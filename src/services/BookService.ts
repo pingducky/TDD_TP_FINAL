@@ -23,8 +23,6 @@ export class BookService {
             sum += (i + 1) * digit;
         }
     
-        console.debug("sum % 11 ", sum % 11);
-        
         return sum % 11 === 0;
     }
 }

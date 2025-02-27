@@ -115,9 +115,73 @@ export const getBookByIsbn = async (req: Request, res: Response): Promise<void> 
 };
 
 export const updateBook = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { bookId, title, isbn, editorId, formatId, authorId } = req.body;
 
+    if (!bookId) {
+      throw new BadRequestError("ID du livre requis");
+    }
+
+    if (isbn && !BookService.isIsbnValid(isbn)) {
+      throw new BadRequestError('ISBN invalide');
+    }
+
+    const book = await BookModel.findByPk(bookId);
+    if (!book) {
+      throw new NotFoundError("Le livre à mettre à jour n'a pas été trouvé");
+    }
+
+    const editor = await EditorModel.findByPk(editorId);
+    if (editorId && !editor) {
+      throw new NotFoundError("L'éditeur n'a pas été trouvé");
+    }
+
+    const author = await AuthorModel.findByPk(authorId);
+    if (authorId && !author) {
+      throw new NotFoundError("L'auteur n'a pas été trouvé");
+    }
+
+    const bookFormat = await BookFormatModel.findByPk(formatId);
+    if (formatId && !bookFormat) {
+      throw new NotFoundError("Le format du livre n'a pas été trouvé");
+    }
+
+    const updatedBook = await book.update({
+      title: title || book.title,
+      isbn: isbn || book.isbn,
+      editorId: editorId || book.editorId,
+      formatId: formatId || book.formatId,
+      authorId: authorId || book.authorId,
+    });
+
+    res.status(200).json({
+      message: "Livre mis à jour avec succès",
+      data: updatedBook,
+    });
+  } catch (error) {
+    handleHttpError(error, res);
+  }
 };
 
-export const deleteBook = async (req: Request, res: Response): Promise<void> => {
 
+export const deleteBook = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { id } = req.body;
+
+    if (!id) {
+      throw new BadRequestError("L'id du livre est manquant ou invalide")
+    }
+
+    const book = await BookModel.findByPk(id);
+
+    if (!book) {
+      throw new NotFoundError("Livre non trouvé");
+    }
+    await book.destroy();
+
+    res.status(200).json({ message: "Livre supprimé avec succès" });
+
+  } catch(error) {
+    handleHttpError(error, res);
+  }
 };
