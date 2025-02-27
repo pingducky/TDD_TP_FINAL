@@ -92,6 +92,28 @@ export const getBookById = async (req: Request, res: Response): Promise<void> =>
   }
 };
 
+export const getBookByIsbn = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { isbn } = req.body;
+
+    if (!isbn) {
+      throw new BadRequestError("L'isbn du livre est manquant")
+    }
+
+    try {
+      !BookService.isIsbnValid(isbn)
+    } catch (error) {
+      throw new BadRequestError('ISBN invalide');
+    }
+
+    const book = await BookModel.findOne({where: { isbn: isbn}})
+
+    res.status(200).json(book);
+  } catch (error) {
+    handleHttpError(error, res);
+  }
+};
+
 export const updateBook = async (req: Request, res: Response): Promise<void> => {
 
 };
