@@ -1,0 +1,50 @@
+CREATE TABLE member (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    lastName VARCHAR(255) NOT NULL,
+    firstName VARCHAR(255) NOT NULL
+);
+
+CREATE TABLE reservation (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    memberId INT NOT NULL,
+    FOREIGN KEY (memberId) REFERENCES member(id) ON DELETE CASCADE
+);
+
+CREATE TABLE book_format (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(255) NOT NULL
+);
+
+CREATE TABLE editor (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(255) NOT NULL,
+    siret VARCHAR(20) NULL UNIQUE
+);
+
+CREATE TABLE author (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    lastName VARCHAR(255) NOT NULL,
+    firstName VARCHAR(255) NOT NULL
+);
+
+CREATE TABLE book (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    isbn VARCHAR(20) UNIQUE NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    editorId INT NOT NULL,
+    formatId INT NOT NULL,
+    authorId INT NOT NULL,
+    isAvailable BOOLEAN DEFAULT TRUE,
+    lastBorrowedAt DATETIME NULL,
+    FOREIGN KEY (editorId) REFERENCES editor(id) ON DELETE CASCADE,
+    FOREIGN KEY (formatId) REFERENCES book_format(id) ON DELETE CASCADE,
+    FOREIGN KEY (authorId) REFERENCES author(id) ON DELETE CASCADE
+);
+
+CREATE TABLE reservation_book (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    bookId INT NOT NULL,
+    reservationId INT NOT NULL,
+    FOREIGN KEY (bookId) REFERENCES book(id) ON DELETE CASCADE,
+    FOREIGN KEY (reservationId) REFERENCES reservation(id) ON DELETE CASCADE
+);
