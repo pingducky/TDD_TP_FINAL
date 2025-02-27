@@ -78,7 +78,18 @@ export const getAllBook = async (res: Response): Promise<void> => {
 };
 
 export const getBookById = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { id } = req.body;
 
+    if (!id) {
+      throw new BadRequestError("L'id du livre est manquant ou invalide")
+    }
+
+    const book = await BookModel.findByPk(id);
+    res.status(200).json(book);
+  } catch (error) {
+    handleHttpError(error, res);
+  }
 };
 
 export const updateBook = async (req: Request, res: Response): Promise<void> => {
