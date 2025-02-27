@@ -1,5 +1,6 @@
 import { ErrorEnum } from "../enums/errorEnum";
 import { BadRequestError } from "../errors/BadRequestError";
+import { ConflictError } from "../errors/ConflictError";
 import { ForbiddenError } from "../errors/ForbiddenError";
 import { NotFoundError } from "../errors/NotFoundError";
 import { UnauthorizedError } from "../errors/UnauthorizedError";
@@ -21,6 +22,10 @@ export const handleHttpError = (error: unknown, res: Response): void => {
     }
     if (error instanceof BadRequestError) {
         res.status(400).json({ error: error.message });
+        return;
+    }
+    if (error instanceof ConflictError) {
+        res.status(409).json({ error: error.message });
         return;
     }
 

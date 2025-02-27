@@ -4,6 +4,7 @@ export enum ErrorEnum {
   FORBIDDEN = "Interdit",
   UNEXPECTED_ERROR = "Une exception non géré s'est produite",
   INTERNAL_SERVER_ERROR = "Erreur interne du serveur",
-  BAD_REQUEST = "Mauvaise requête"
+  BAD_REQUEST = "Mauvaise requête",
+  CONFLICT = "Conflit"
 }
   

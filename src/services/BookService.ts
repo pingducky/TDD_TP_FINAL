@@ -16,7 +16,6 @@ export class BookService {
             } else {
             digit = parseInt(isbn[i], 10);
             if (isNaN(digit)) {
-                console.log("ERROR WILL BE THROW")
                 throw new Error('Invalid ISBN format');
             }
             }
