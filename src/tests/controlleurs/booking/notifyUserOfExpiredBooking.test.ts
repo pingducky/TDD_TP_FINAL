@@ -3,7 +3,9 @@ import { notifyUserOfExpiredBooking } from "../../../controllers/BookingControll
 import MemberModel from "../../../models/MemberModel";
 import ReservationModel from "../../../models/ReservationModel";
 
-// Stub du service de mail
+// /!\ Le stub est dupliqué car je n'ai pas réussis à le mettre dans un fichier séparé (bug lors de l'importation) /!\ 
+// Todo : déplacer le stub dans src/services/mailer/mailerServiceStub
+
 class MailerServiceStub implements IMailerService {
     private sendMailParam: { to: string; subject: string; body: string } | null = null;
     private sendMailData: boolean = false;

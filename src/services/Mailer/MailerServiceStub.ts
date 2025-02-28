@@ -1,4 +1,4 @@
-class MailerServiceStub implements IMailerService {
+class rMailerServiceStub implements IMailerService {
     private sendMailParam: { to: string; subject: string; body: string } | null = null;
     private sendMailData: boolean = false;
   
