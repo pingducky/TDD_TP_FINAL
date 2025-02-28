@@ -5,7 +5,7 @@ class MemberModel extends Model {
     public id!: number;
     public lastName!: string;
     public firstName!: string;
-
+    public email!: string;
 }
 
 MemberModel.init(
@@ -20,6 +20,10 @@ MemberModel.init(
             allowNull: false,
         },
         firstName: {
+            type: DataTypes.STRING,
+            allowNull: false,
+        },
+        email: {
             type: DataTypes.STRING,
             allowNull: false,
         },

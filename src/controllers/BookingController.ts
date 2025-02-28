@@ -6,6 +6,9 @@ import BookModel from '../models/BookModel';
 import ReservationModel from '../models/ReservationModel';
 import { handleHttpError } from '../services/ErrorService';
 import { BookService } from '../services/BookService';
+import sequelize from 'sequelize';
+import { error } from 'console';
+import { InternalServerError } from '../errors/InternalServerError';
 
 
 export const createBooking = async (req: Request, res: Response): Promise<void> => {
@@ -184,6 +187,59 @@ export const getReservationByMemberId = async (req: Request, res: Response): Pro
 
         res.status(200).json({ reservations });
 
+    } catch (error) {
+        handleHttpError(error, res);
+    }
+};
+
+export const notifyUserOfExpiredBooking = async (req: Request, res: Response, mailerService: IMailerService): Promise<void> => {
+    try {
+        const { memberId } = req.params;
+
+        if (!memberId) {
+            throw new BadRequestError('Id de l\'adhérent manquant');
+        }
+
+        const member = await MemberModel.findByPk(memberId);
+        if (!member) {
+            throw new NotFoundError("Adhérent non trouvé");
+        }
+
+        const today = new Date(); // Récupérer la date d'aujourd'hui
+
+        const reservations = await ReservationModel.findAll({
+          where: {
+            memberId,
+            actualEndDate: null,
+            expectedEndDate: {
+              [sequelize.Op.lt]: today
+            }
+          }
+        });
+
+        if (reservations.length > 0) {
+            const subject = 'Réservations expirées';
+            let body = 'Les réservations suivantes ont expiré :\n\n';
+        
+            reservations.forEach((reservation) => {
+                body += `- Réservation n°${reservation.id} (Date de fin prévue : ${reservation.expectedEndDate})\n`;
+            });
+        
+                // Envoi du mail
+                const sendMail = await mailerService.sendMail(member.email, subject, body);
+
+                if (sendMail) {
+                    res.status(200).json({ reservations });
+                    return;
+                }
+                else {
+                    throw new InternalServerError("Le mail n'a pas pu être envoyé")
+                }
+        }
+        
+        // Si aucune réservation n'est expirée, renvoie le code 204 sans contenu
+        res.status(204).json({ message: 'Aucune réservation expirée' });
+        
     } catch (error) {
         handleHttpError(error, res);
     }
