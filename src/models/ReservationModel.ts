@@ -1,10 +1,14 @@
 import { DataTypes, Model } from "sequelize";
-import sequelize from "./../config/sequelize"
+import sequelize from "./../config/sequelize";
 import MemberModel from "./MemberModel";
+import BookModel from "./BookModel"; // Import du modèle Livre
 
 class ReservationModel extends Model {
     public id!: number;
     public memberId!: number;
+    public bookId!: number;
+    public startDate!: Date;
+    public endDate!: Date;
 }
 
 ReservationModel.init(
@@ -19,13 +23,30 @@ ReservationModel.init(
             allowNull: false,
             references: {
                 model: MemberModel,
-                key: 'id',
+                key: "id",
             },
+        },
+        bookId: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+            references: {
+                model: BookModel,
+                key: "id",
+            },
+        },
+        startDate: { 
+            type: DataTypes.DATE,
+            allowNull: false,
+            defaultValue: DataTypes.NOW, 
+        },
+        endDate: {
+            type: DataTypes.DATE,
+            allowNull: false,
         },
     },
     {
         sequelize,
-        tableName: 'reservation',
+        tableName: "reservation",
         timestamps: false,
     }
 );
