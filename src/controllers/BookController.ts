@@ -8,8 +8,9 @@ import BookFormatModel from '../models/BookFormatModel';
 import BookModel from '../models/BookModel';
 import { ConflictError } from '../errors/ConflictError';
 import { BookService } from '../services/BookService';
+import { IBookWebService } from '../services/BookWebService/IBookWebService';
 
-export const createBook = async (req: Request, res: Response): Promise<void> => {
+export const createBook = async (req: Request, res: Response, bookWebService: IBookWebService): Promise<void> => {
   try {
     const { title, isbn, editorId, formatId, authorId } = req.body;
 
@@ -50,6 +51,8 @@ export const createBook = async (req: Request, res: Response): Promise<void> => 
       throw new ConflictError("Le livre existe déja")
     }
 
+    // Todo : utiliser le bookWebService et appeller getBookInformation pour récupérer des informations qui seraient manquante à la création du livre
+  
     const newBook = await BookModel.create({
       isbn,
       title,

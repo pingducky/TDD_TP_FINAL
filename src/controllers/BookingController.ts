@@ -16,23 +16,19 @@ export const createBooking = async (req: Request, res: Response): Promise<void> 
     try {
         const { memberId, bookId } = req.body;
 
-        // Vérification des champs requis
         if (!memberId || !bookId) {
             throw new BadRequestError('Champs requis manquants');
         }
-        // Vérifier si l'adhérent existe
         const member = await MemberModel.findByPk(memberId);
         if (!member) {
             throw new NotFoundError('Le membre n\'existe pas');
         }
     
-        // Vérifier si le livre existe
         const book = await BookModel.findByPk(bookId);
         if (!book) {
             throw new NotFoundError('Le livre n\'existe pas');
         }
 
-        // Vérifier si l'adhérent n'a pas déjà 3 réservations actives
         const activeReservationsCount = await ReservationModel.count({
             where: { memberId },
         });
@@ -41,12 +37,10 @@ export const createBooking = async (req: Request, res: Response): Promise<void> 
             throw new BadRequestError("Vous avez déjà 3 réservations en cours");
         }
     
-        // Déterminer la date de fin (4 mois après la date de réservation)
         const startDate = new Date();
         const endDate = new Date(startDate);
         endDate.setMonth(startDate.getMonth() + 4);
     
-        // Créer la réservation
         const reservation = await ReservationModel.create({
             memberId,
             bookId,
@@ -175,7 +169,7 @@ export const getOpenedBooking = async (req: Request, res: Response): Promise<voi
     }
 };
 
-export const getReservationByMemberId = async (req: Request, res: Response): Promise<void> => {
+export const getBookingByMemberId = async (req: Request, res: Response): Promise<void> => {
     try {
         const { memberId } = req.params;
 
@@ -206,7 +200,7 @@ export const notifyUserOfExpiredBooking = async (req: Request, res: Response, ma
             throw new NotFoundError("Adhérent non trouvé");
         }
 
-        const today = new Date(); // Récupérer la date d'aujourd'hui
+        const today = new Date();
 
         const reservations = await ReservationModel.findAll({
           where: {
@@ -226,7 +220,6 @@ export const notifyUserOfExpiredBooking = async (req: Request, res: Response, ma
                 body += `- Réservation n°${reservation.id} (Date de fin prévue : ${reservation.expectedEndDate})\n`;
             });
         
-                // Envoi du mail
                 const sendMail = await mailerService.sendMail(member.email, subject, body);
 
                 if (sendMail) {
@@ -246,7 +239,6 @@ export const notifyUserOfExpiredBooking = async (req: Request, res: Response, ma
                 }
         }
         
-        // Si aucune réservation n'est expirée, renvoie le code 204 sans contenu
         res.status(204).json({ message: 'Aucune réservation expirée' });
         
     } catch (error) {

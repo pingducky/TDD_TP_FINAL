@@ -4,6 +4,8 @@ import { EditorModel } from "../../../models/EditorModel";
 import { AuthorModel } from "../../../models/AuthorModel";
 import BookModel from "../../../models/BookModel";
 import BookFormatModel from "../../../models/BookFormatModel";
+import { IBookWebService } from "../../../services/BookWebService/IBookWebService";
+import { BookWebServiceStub } from "../../../services/BookWebService/IBookInformationStub";
 
 jest.mock("../../../models/BookModel");
 jest.mock("../../../models/EditorModel");
@@ -14,6 +16,7 @@ describe("Création d'un livre", () => {
   let req: Partial<Request>;
   let res: Partial<Response>;
   let jsonMock: jest.Mock;
+  let bookWebService: IBookWebService;
 
   const mockEditor = {
     id: 1,
@@ -50,6 +53,7 @@ describe("Création d'un livre", () => {
       status: jest.fn(() => res),
       json: jsonMock,
     } as Partial<Response>;
+    bookWebService = new BookWebServiceStub();
   });
 
   test("Doit vérifier les champs obligatoires et retourner une erreur 400", async () => {
@@ -57,7 +61,7 @@ describe("Création d'un livre", () => {
       body: {},
     };
 
-    await createBook(req as Request, res as Response);
+    await createBook(req as Request, res as Response, bookWebService);
 
     expect(res.status).toHaveBeenCalledWith(400);
     expect(jsonMock).toHaveBeenCalledWith({
@@ -74,7 +78,7 @@ describe("Création d'un livre", () => {
       },
     };
 
-    await createBook(req as Request, res as Response);
+    await createBook(req as Request, res as Response, bookWebService);
     expect(res.status).toHaveBeenCalledWith(400);
     expect(jsonMock).toHaveBeenCalledWith({
       error: expect.stringContaining("Champs requis manquants"),
@@ -97,7 +101,7 @@ describe("Création d'un livre", () => {
     (AuthorModel.findByPk as jest.Mock).mockResolvedValue(mockAuthor);
     (BookFormatModel.findByPk as jest.Mock).mockResolvedValue(mockBookFormat);
 
-    await createBook(req as Request, res as Response);
+    await createBook(req as Request, res as Response, bookWebService);
     expect(res.status).toHaveBeenCalledWith(404);
     expect(jsonMock).toHaveBeenCalledWith({
         error: "L'éditeur n'a pas été trouvé",
@@ -119,7 +123,7 @@ describe("Création d'un livre", () => {
     (AuthorModel.findByPk as jest.Mock).mockResolvedValue(null);
     (BookFormatModel.findByPk as jest.Mock).mockResolvedValue(mockBookFormat);
 
-    await createBook(req as Request, res as Response);
+    await createBook(req as Request, res as Response, bookWebService);
     expect(res.status).toHaveBeenCalledWith(404);
     expect(jsonMock).toHaveBeenCalledWith({
         error: "L'auteur n'a pas été trouvé",
@@ -141,7 +145,7 @@ describe("Création d'un livre", () => {
     (AuthorModel.findByPk as jest.Mock).mockResolvedValue(mockAuthor);
     (BookFormatModel.findByPk as jest.Mock).mockResolvedValue(null);
 
-    await createBook(req as Request, res as Response);
+    await createBook(req as Request, res as Response, bookWebService);
     expect(res.status).toHaveBeenCalledWith(404);
     expect(jsonMock).toHaveBeenCalledWith({
         error: "Le format du livre n'a pas été trouvé",
@@ -165,7 +169,7 @@ describe("Création d'un livre", () => {
     (BookModel.findOne as jest.Mock).mockResolvedValue(mockBook);
 
 
-    await createBook(req as Request, res as Response);
+    await createBook(req as Request, res as Response, bookWebService);
     expect(res.status).toHaveBeenCalledWith(409);
     expect(jsonMock).toHaveBeenCalledWith({
         error: "Le livre existe déja",
@@ -187,7 +191,7 @@ describe("Création d'un livre", () => {
     (AuthorModel.findByPk as jest.Mock).mockResolvedValue(mockAuthor);
     (BookFormatModel.findByPk as jest.Mock).mockResolvedValue(mockBookFormat);
 
-    await createBook(req as Request, res as Response);
+    await createBook(req as Request, res as Response, bookWebService);
     expect(res.status).toHaveBeenCalledWith(400);
     expect(jsonMock).toHaveBeenCalledWith({
         error: "ISBN invalide",
@@ -208,12 +212,11 @@ describe("Création d'un livre", () => {
     (EditorModel.findByPk as jest.Mock).mockResolvedValue(mockEditor);
     (AuthorModel.findByPk as jest.Mock).mockResolvedValue(mockAuthor);
     (BookFormatModel.findByPk as jest.Mock).mockResolvedValue(mockBookFormat);
-    (BookModel.findOne as jest.Mock).mockResolvedValue(null); // Aucun livre existant avec cet ISBN
+    (BookModel.findOne as jest.Mock).mockResolvedValue(null);
   
-    // Mocker la création du livre
     (BookModel.create as jest.Mock).mockResolvedValue(mockBook);
   
-    await createBook(req as Request, res as Response);
+    await createBook(req as Request, res as Response, bookWebService);
   
     expect(res.status).toHaveBeenCalledWith(201);
     expect(jsonMock).toHaveBeenCalledWith({

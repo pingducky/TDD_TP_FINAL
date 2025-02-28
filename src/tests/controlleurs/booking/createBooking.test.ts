@@ -110,7 +110,6 @@ describe("Création d'une réservation", () => {
             },
         };
 
-        // Mock de la vérification du nombre de réservations actives pour l'adhérent
         (ReservationModel.count as jest.Mock).mockResolvedValue(3);
         (MemberModel.findByPk as jest.Mock).mockResolvedValue(mockMember);
         (BookModel.findByPk as jest.Mock).mockResolvedValue(mockBook);
@@ -134,7 +133,6 @@ describe("Création d'une réservation", () => {
         const fourMonthsLater = new Date();
         fourMonthsLater.setMonth(fourMonthsLater.getMonth() + 4); // Date dans 4 mois
 
-        // Mock de la création d'une réservation
         (ReservationModel.create as jest.Mock).mockResolvedValue({
             ...mockReservation,
             endDate: fourMonthsLater,

@@ -1,7 +1,6 @@
 import { Sequelize } from "sequelize";
 import * as dotenv from "dotenv";
 
-// Charger le fichier .env en fonction de NODE_ENV
 dotenv.config({
   path: process.env.NODE_ENV === "test" ? ".env.test" : ".env.development",
 });

@@ -45,13 +45,11 @@ export const createMember = async (req: Request, res: Response): Promise<void> =
       throw new BadRequestError(`Champs requis manquants: ${missingFields.join(", ")}`);
     }
 
-    // Vérifier si l'email est déjà utilisé
     const existingMember = await MemberModel.findOne({ where: { email } });
     if (existingMember) {
       throw new ConflictError("Un membre avec cet email existe déjà");
     }
 
-    // Créer le nouveau membre
     const newMember = await MemberModel.create({
       lastName,
       firstName,

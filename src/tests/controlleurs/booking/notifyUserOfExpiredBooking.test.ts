@@ -3,33 +3,7 @@ import { notifyUserOfExpiredBooking } from "../../../controllers/BookingControll
 import MemberModel from "../../../models/MemberModel";
 import ReservationModel from "../../../models/ReservationModel";
 import MailModel from "../../../models/MailModel";
-
-// /!\ Le stub est dupliqué car je n'ai pas réussis à le mettre dans un fichier séparé (bug lors de l'importation) /!\ 
-// Todo : déplacer le stub dans src/services/mailer/mailerServiceStub
-
-class MailerServiceStub implements IMailerService {
-    private sendMailParam: { to: string; subject: string; body: string } | null = null;
-    private sendMailData: boolean = false;
-
-    async sendMail(to: string, subject: string, body: string): Promise<boolean> {
-        this.sendMailParam = { to, subject, body };
-        console.log(`Envoi du mail à ${to} avec le sujet: ${subject}`);
-        console.log(`Corps du message: ${body}`);
-        return Promise.resolve(this.getSendMailData);
-    }
-
-    public get getSendMailParam(): { to: string; subject: string; body: string } | null {
-        return this.sendMailParam;
-    }
-
-    public get getSendMailData(): boolean {
-        return this.sendMailData;
-    }
-
-    public set setSendMailData(data: boolean) {
-        this.sendMailData = data;
-    }
-}
+import { MailerServiceStub } from "../../../services/Mailer/MailerServiceStub";
 
 jest.mock("../../../models/MemberModel");
 jest.mock("../../../models/ReservationModel");
@@ -123,18 +97,16 @@ describe("Notification des réservations expirées", () => {
         
         mailerService.setSendMailData = true;
 
-        // Nous mockons l'implémentation de create pour vérifier que le mail est bien enregistré
         (MailModel.create as jest.Mock).mockResolvedValue(undefined);
 
         await notifyUserOfExpiredBooking(req as Request, res as Response, mailerService);
 
-        // Vérifier que MailModel.create a été appelé pour enregistrer l'email
         expect(MailModel.create).toHaveBeenCalledWith({
             sender: "no-reply@example.com",
             recipient: "test@example.com",
             subject: "Réservations expirées",
             body: "Les réservations suivantes ont expiré :\n\n- Réservation n°1 (Date de fin prévue : " + new Date("2025-02-01T00:00:00Z").toString() +")\n",
-            sentAt: expect.any(Date), // Vérifier que la date d'envoi est bien générée
+            sentAt: expect.any(Date),
         });
 
         expect(res.status).toHaveBeenCalledWith(200);

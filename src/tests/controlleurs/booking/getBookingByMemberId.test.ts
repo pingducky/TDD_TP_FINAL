@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import MemberModel from "../../../models/MemberModel";
 import ReservationModel from "../../../models/ReservationModel";
-import { getReservationByMemberId } from "../../../controllers/BookingController";
+import { getBookingById, getBookingByMemberId } from "../../../controllers/BookingController";
 
 jest.mock("../../../models/MemberModel");
 jest.mock("../../../models/ReservationModel");
@@ -29,7 +29,7 @@ describe("getReservationByMemberId", () => {
     test("Retourne 404 si l'adhérent n'existe pas", async () => {
         (MemberModel.findByPk as jest.Mock).mockResolvedValue(null);
 
-        await getReservationByMemberId(req as Request, res as Response);
+        await getBookingByMemberId(req as Request, res as Response);
 
         expect(res.status).toHaveBeenCalledWith(404);
         expect(jsonMock).toHaveBeenCalledWith({ error: "Adhérent non trouvé" });
@@ -39,7 +39,7 @@ describe("getReservationByMemberId", () => {
         (MemberModel.findByPk as jest.Mock).mockResolvedValue(mockMember);
         (ReservationModel.findAll as jest.Mock).mockResolvedValue([]);
 
-        await getReservationByMemberId(req as Request, res as Response);
+        await getBookingByMemberId(req as Request, res as Response);
 
         expect(res.status).toHaveBeenCalledWith(200);
         expect(jsonMock).toHaveBeenCalledWith({ reservations: [] });
@@ -49,9 +49,9 @@ describe("getReservationByMemberId", () => {
         (MemberModel.findByPk as jest.Mock).mockResolvedValue(mockMember);
         (ReservationModel.findAll as jest.Mock).mockResolvedValue(mockReservations);
 
-        await getReservationByMemberId(req as Request, res as Response);
+        await getBookingByMemberId(req as Request, res as Response);
 
-        expect(res.status).toHaveBeenCalledWith(200);
+            expect(res.status).toHaveBeenCalledWith(200);
         expect(jsonMock).toHaveBeenCalledWith({ reservations: mockReservations });
     });
 });
