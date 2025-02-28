@@ -170,3 +170,21 @@ export const getOpenedBooking = async (req: Request, res: Response): Promise<voi
         handleHttpError(error, res);
     }
 };
+
+export const getReservationByMemberId = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const { memberId } = req.params;
+
+        const member = await MemberModel.findByPk(memberId);
+        if (!member) {
+            throw new NotFoundError("Adhérent non trouvé");
+        }
+
+        const reservations = await ReservationModel.findAll({ where: { memberId } });
+
+        res.status(200).json({ reservations });
+
+    } catch (error) {
+        handleHttpError(error, res);
+    }
+};
