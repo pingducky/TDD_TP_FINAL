@@ -9,6 +9,7 @@ import { BookService } from '../services/BookService';
 import sequelize from 'sequelize';
 import { error } from 'console';
 import { InternalServerError } from '../errors/InternalServerError';
+import MailModel from '../models/MailModel';
 
 
 export const createBooking = async (req: Request, res: Response): Promise<void> => {
@@ -229,6 +230,14 @@ export const notifyUserOfExpiredBooking = async (req: Request, res: Response, ma
                 const sendMail = await mailerService.sendMail(member.email, subject, body);
 
                 if (sendMail) {
+                    await MailModel.create({
+                        sender: "no-reply@example.com",
+                        recipient: member.email,
+                        subject,
+                        body,
+                        sentAt: new Date(),
+                    });
+
                     res.status(200).json({ reservations });
                     return;
                 }
