@@ -46,9 +46,26 @@ describe("Clôture d'une réservation par ISBN", () => {
         expect(jsonMock).toHaveBeenCalledWith({ error: "Livre introuvable avec cet ISBN" });
     });
 
-    test("Clôture d'une réservation avec succès par ISBN", async () => {
+    test("Ne doit pas clôturer une réservation si aucune réservation n'est trouvée", async () => {
         const mockBook = { id: 1 };
-        const mockReservation = { destroy: jest.fn() };
+        req = { params: { isbn: "123456789" } };
+
+        (BookService.isIsbnValid as jest.Mock).mockReturnValue(true);
+        (BookModel.findOne as jest.Mock).mockResolvedValue(mockBook);
+        (ReservationModel.findOne as jest.Mock).mockResolvedValue(null);
+
+        await closeBookingByIsbn(req as Request, res as Response);
+
+        expect(res.status).toHaveBeenCalledWith(404);
+        expect(jsonMock).toHaveBeenCalledWith({ error: "Aucune réservation trouvée pour ce livre" });
+    });
+
+    test("Clôture d'une réservation avec succès par ISBN (soft delete)", async () => {
+        const mockBook = { id: 1 };
+        const mockReservation = {
+            actualEndDate: null,
+            save: jest.fn(), // Mock de save() au lieu de destroy()
+        };
         req = { params: { isbn: "123456789" } };
 
         (BookService.isIsbnValid as jest.Mock).mockReturnValue(true);
@@ -57,7 +74,8 @@ describe("Clôture d'une réservation par ISBN", () => {
 
         await closeBookingByIsbn(req as Request, res as Response);
 
-        expect(mockReservation.destroy).toHaveBeenCalled();
+        expect(mockReservation.actualEndDate).toBeInstanceOf(Date); // Vérifie que la date est mise à jour
+        expect(mockReservation.save).toHaveBeenCalled(); // Vérifie que save() est appelé
         expect(res.status).toHaveBeenCalledWith(200);
         expect(jsonMock).toHaveBeenCalledWith({ message: "Réservation clôturée avec succès" });
     });

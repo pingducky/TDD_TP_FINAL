@@ -72,14 +72,14 @@ export const closeBookingById = async (req: Request, res: Response): Promise<voi
             throw new NotFoundError("La réservation n'existe pas");
         }
 
-        await reservation.destroy();
+        reservation.actualEndDate = new Date();
+        await reservation.save();
 
         res.status(200).json({ message: "Réservation clôturée avec succès" });
     } catch (error) {
         handleHttpError(error, res);
     }
 };
-
 
 export const closeBookingByIsbn = async (req: Request, res: Response): Promise<void> => {
     try {
@@ -99,14 +99,14 @@ export const closeBookingByIsbn = async (req: Request, res: Response): Promise<v
             throw new NotFoundError("Aucune réservation trouvée pour ce livre");
         }
 
-        await reservation.destroy();
+        reservation.actualEndDate = new Date();
+        await reservation.save();
 
         res.status(200).json({ message: "Réservation clôturée avec succès" });
     } catch (error) {
         handleHttpError(error, res);
     }
 };
-
 
 export const getAllBooking = async (req: Request, res: Response): Promise<void> => {
     try {
@@ -154,6 +154,18 @@ export const getBookingByIsbn = async (req: Request, res: Response): Promise<voi
         }
 
         res.status(200).json(reservation);
+    } catch (error) {
+        handleHttpError(error, res);
+    }
+};
+
+export const getOpenedBooking = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const reservations = await ReservationModel.findAll({
+            where: { actualEndDate: null }, 
+        });
+
+        res.status(200).json(reservations);
     } catch (error) {
         handleHttpError(error, res);
     }

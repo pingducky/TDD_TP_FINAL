@@ -40,14 +40,15 @@ describe("Clôture d'une réservation par ID", () => {
     });
 
     test("Clôture d'une réservation avec succès", async () => {
-        const mockReservation = { destroy: jest.fn() };
+        const mockReservation = { save: jest.fn(), actualEndDate: null };
         req = { params: { reservationId: "1" } };
 
         (ReservationModel.findByPk as jest.Mock).mockResolvedValue(mockReservation);
 
         await closeBookingById(req as Request, res as Response);
 
-        expect(mockReservation.destroy).toHaveBeenCalled();
+        expect(mockReservation.actualEndDate).toBeInstanceOf(Date);
+        expect(mockReservation.save).toHaveBeenCalled();
         expect(res.status).toHaveBeenCalledWith(200);
         expect(jsonMock).toHaveBeenCalledWith({ message: "Réservation clôturée avec succès" });
     });

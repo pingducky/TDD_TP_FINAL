@@ -8,7 +8,8 @@ class ReservationModel extends Model {
     public memberId!: number;
     public bookId!: number;
     public startDate!: Date;
-    public endDate!: Date;
+    public expectedEndDate!: Date;
+    public actualEndDate!: Date;
 }
 
 ReservationModel.init(
@@ -39,9 +40,13 @@ ReservationModel.init(
             allowNull: false,
             defaultValue: DataTypes.NOW, 
         },
-        endDate: {
+        expectedEndDate: {
             type: DataTypes.DATE,
             allowNull: false,
+        },
+        actualEndDate: {
+            type: DataTypes.DATE,
+            allowNull: true,
         },
     },
     {
